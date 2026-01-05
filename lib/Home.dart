@@ -1,19 +1,24 @@
-import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:login_form/About.dart';
 import 'package:login_form/Add.dart';
 import 'package:login_form/AllProperty.dart';
-import 'package:login_form/Cart.dart';
+import 'package:login_form/Categories.dart';
 import 'package:login_form/Favourite.dart';
 import 'package:login_form/Help.dart';
-import 'package:login_form/ProInfo.dart';
+import 'package:login_form/Meetings.dart';
 import 'package:login_form/Profile.dart';
-import 'package:login_form/main.dart';
+import 'package:login_form/YourProperty.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
+import 'Login.dart';
+import 'ProInfo.dart';
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   State<Home> createState() => _HomeState();
 }
@@ -22,442 +27,549 @@ class _HomeState extends State<Home> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   CollectionReference collectionReference=FirebaseFirestore.instance.collection('Properties');
   CollectionReference userData=FirebaseFirestore.instance.collection('Users');
-
-  ScrollController _scrollController = ScrollController();
-  int _currentIndex = 0;
-
-  void initState() {
-    super.initState();
-    Timer.periodic(Duration(seconds: 2), (Timer timer) {
-      if(_currentIndex < 3-1){
-        _currentIndex++;
-        _scrollController.animateTo(_currentIndex * 365,duration: Duration(milliseconds: 500),curve: Curves.easeInOut,);
-      } else {
-        _currentIndex = 0;
-        _scrollController.animateTo(0,duration: Duration(milliseconds: 500), curve: Curves.easeInOut,);
-      }
-    });
-  }
+  CollectionReference recentVisited=FirebaseFirestore.instance.collection("Users");
+  bool isExist=false;
+  late String recentCollectionName;
 
   @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xffF5EFE7),
       appBar: AppBar(
+        backgroundColor: Color(0xffF5EFE7),
         actions: [
-          IconButton(
-            icon: Icon(Icons.shopping_cart_outlined, color: Colors.black87,size: 27,),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (builder){
-                return Cart();
-              }));
-            },
+          Container(
+            decoration: BoxDecoration(color: Color(0xff3E5879).withValues(alpha:  0.1),borderRadius: BorderRadius.circular(50)),
+            child: IconButton(
+              icon: Icon(Icons.home_work,color: Color(0xff213555),size: 20,),
+            onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (builder){
+                  return YourProperty();
+                }));
+            },),
+          ),
+          SizedBox(width: 10,),
+          Container(
+            decoration: BoxDecoration(color: Color(0xff3E5879).withValues(alpha:  0.1),borderRadius: BorderRadius.circular(50)),
+            child: IconButton(
+              icon: Icon(Icons.calendar_month_rounded, color: Color(0xff213555),size: 20,),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (builder){
+                  return Meetings();
+                }));
+              },
+            ),
           ),
         ],
-        title: Text("Nestly", style: GoogleFonts.akayaTelivigala(textStyle: TextStyle(fontSize: 28,),),),
+        title: Text("Villa", style: GoogleFonts.akayaTelivigala(textStyle: TextStyle(fontSize: 28,),),),
         centerTitle: true,
       ),
       drawer: Drawer(
-          child: ListView(
+        backgroundColor: Color(0xffF5EFE7),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          SizedBox(height: 25,),
           Container(
-            height: 160,
+            height: 140,width: double.infinity,
+            decoration: BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/profile_banner.png")),),
             child: StreamBuilder(
               stream: userData.doc(_auth.currentUser!.uid).snapshots(),
               builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot){
                 if(snapshot.hasData){
-                  Map<String, dynamic> data=snapshot.data!.data() as Map<String, dynamic>;
-                  return DrawerHeader(
-                    decoration: BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/pfpbg.jpg"), fit: BoxFit.fitWidth)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                            height: 55,
-                            width: 75,
-                            child: CircleAvatar(backgroundImage: (data['pfpURL'].toString().isEmpty)?AssetImage("assets/images/ProfilePic.jpg"):NetworkImage(data['pfpURL']),
-                              radius: 50,
-                            )),
-                        SizedBox(height: 15,),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          child: Text(data['userName'], style: TextStyle(color: Colors.white, fontSize: 17)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          child: Text(data['email'], style: TextStyle(fontSize: 14, color: Colors.white),),
-                        )
-                      ],
-                    ),
+                  Map<String,dynamic> data=snapshot.data!.data() as Map<String,dynamic>;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(width: 15,),
+                      Container(
+                        height: 55,width: 55,
+                        decoration: BoxDecoration(image: DecorationImage(image: (data['pfpURL'].toString().isEmpty)?AssetImage("assets/images/ProfilePic.jpg"):NetworkImage(data['pfpURL']),fit: BoxFit.contain),
+                            borderRadius: BorderRadius.circular(50)),
+                      ),
+                      SizedBox(width: 15,),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(data['userName'], style: TextStyle(color: Colors.white, fontSize: 17)),
+                          Text(data['email'],style: TextStyle(fontSize: 14, color: Colors.white),)
+                        ],
+                      )
+                    ],
                   );
                 } else if(snapshot.hasError){
-                  return Center(child: Text("Something went wrong"),);
+                  return Text("Something went wrong");
                 } else {
-                  return Center(child: CircularProgressIndicator(),);
+                  return Center(child: CircularProgressIndicator(color: Colors.white,),);
                 }
               },
             )
           ),
           ListTile(
-            title: Text("Home", style: TextStyle(fontSize: 17)),
-            leading: Icon(Icons.home_outlined, size: 24,),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return Home();
-              }));
-            },
-          ),
-          SizedBox(height: 5,),
-          ListTile(
-            title: Text("Profile", style: TextStyle(fontSize: 17)),
-            leading: Icon(Icons.person_outline, size: 24),
-            onTap: () {
+            title: const Text("Profile"),
+            leading: const Icon(Boxicons.bx_user,color: Color(0xff213555),),
+            trailing: const Icon(Icons.keyboard_arrow_right_outlined,color: Colors.grey,),
+            onTap: (){
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return Profile();
               }));
             },
           ),
-          SizedBox(height: 5,),
           ListTile(
-            title: Text("Schedule's", style: TextStyle(fontSize: 17)),
-            leading: Icon(Icons.schedule_send_outlined, size: 24),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return Cart();
-              }));
-            },
-          ),
-          SizedBox(height: 5,),
-          ListTile(
-            title: Text("Add Property", style: TextStyle(fontSize: 17)),
-            leading: Icon(Icons.add_shopping_cart, size: 24),
-            onTap: () {
+            title: const Text("Add Property"),
+            leading: const Icon(Boxicons.bx_plus,color: Color(0xff213555),),
+            trailing: const Icon(Icons.keyboard_arrow_right_outlined,color: Colors.grey,),
+            onTap: (){
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return Add();
               }));
             },
           ),
-          SizedBox(height: 5,),
           ListTile(
-            title: Text("Favourite", style: TextStyle(fontSize: 17)),
-            leading: Icon(Icons.favorite_border_rounded, size: 24),
-            onTap: () {
+            title: const Text("Favourite"),
+            leading: const Icon(Boxicons.bx_heart,color: Color(0xff213555),),
+            trailing: const Icon(Icons.keyboard_arrow_right_outlined,color: Colors.grey,),
+            onTap: (){
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return Favourite();
               }));
             },
           ),
-          SizedBox(height: 5,),
           ListTile(
-            title: Text("Help", style: TextStyle(fontSize: 17)),
-            leading: Icon(Icons.question_mark_outlined, size: 24),
-            onTap: () {
+            title: const Text("Help"),
+            leading: const Icon(Boxicons.bx_help_circle,color: Color(0xff213555),),
+            trailing: const Icon(Icons.keyboard_arrow_right_outlined,color: Colors.grey,),
+            onTap: (){
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return Help();
               }));
             },
           ),
-          SizedBox(height: 5,),
           ListTile(
-            title: Text("Logout", style: TextStyle(fontSize: 17)),
-            leading: Icon(Icons.logout_outlined, size: 24),
-            onTap: () {
-              if (_auth.currentUser != null) {
-                _auth.signOut();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => Login()),
-                  (Route<dynamic> route) => false,
-                );
-              }
-            },
-          ),
-          SizedBox(height: 5,),
-          ListTile(
-            title: Text("About us", style: TextStyle(fontSize: 17)),
-            leading: Icon(Icons.info_outline, size: 24,),
-            onTap: () {
+            title: const Text("About"),
+            leading: const Icon(Boxicons.bx_info_circle,color: Color(0xff213555),),
+            trailing: const Icon(Icons.keyboard_arrow_right_outlined,color: Colors.grey,),
+            onTap: (){
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return About();
               }));
             },
           ),
-          SizedBox(height: 100),
-          Container(height: 1, decoration: BoxDecoration(border: Border.all(color: Colors.black)),),
-          SizedBox(height: 5,),
+          ListTile(
+            title: const Text("Log Out"),
+            leading: const Icon(Boxicons.bx_log_out,color: Color(0xff213555),),
+            trailing: const Icon(Icons.keyboard_arrow_right_outlined,color: Colors.grey,),
+            onTap: (){
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context)
+              {
+                return AlertDialog(
+                  title: const Text("Confirm Logout"),
+                  content: SizedBox(
+                    height: 100,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Lottie.asset("assets/Animations/Sad Animation.json", height: 100, width: 100, repeat: true, fit: BoxFit.fill),
+                      ],
+                    ),
+                  ),
+                  backgroundColor: const Color(0xffF5EFE6),
+                  actions: [
+                    Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xff4F6F52)),
+                          borderRadius: BorderRadius.circular(5)),
+                      child: TextButton(
+                        child: const Padding(
+                          padding: EdgeInsets.only(left: 7, right: 7),
+                          child: Text("Cancel", style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ),
+                    Container(
+                      height: 45,
+                      decoration: BoxDecoration(color: const Color(0xff213555),
+                          borderRadius: BorderRadius.circular(5)),
+                      child: TextButton(
+                        child: const Padding(
+                          padding: EdgeInsets.only(left: 7, right: 7),
+                          child: Text("Log Out", style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),),
+                        ),
+                        onPressed: () {
+                          _auth.signOut();
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (context) => Login()),
+                                (Route<dynamic> route) => false,);
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              }
+              );
+            }
+          ),
+          Spacer(),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text("Powered by Nestly | © 2024 Nestly All Right Reserved", style: TextStyle(fontSize: 11),),
-              Text("Version (beta)", style: TextStyle(fontSize: 11),),
-              Text("Devloped by StreetDog Production", style: TextStyle(fontSize: 11)),
-              Text("{ Rutvik Kumbhar }", style: TextStyle(fontSize: 11,),),
+              Text("Thank you for choosing Villa!",style: TextStyle(fontSize: 13),),
+              Text("Developed by Rutvik",style: TextStyle(fontSize: 13),),
+              Text("Version: 1.0.0",style: TextStyle(fontSize: 13),),
             ],
           ),
         ],
       )),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 10, 0),
-                  child: TextFormField(
-                    decoration: InputDecoration(hintText: 'Search', hintStyle: TextStyle(fontSize: 18, color: Colors.black45,),
-                      suffixIcon: Icon(Icons.search_rounded, color: Colors.black87, size: 30,),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none,),
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                    ),
-                    readOnly: true,
-                    onTap: (){
-                      final msg=SnackBar(content: Text("Feature coming soon!"));
-                      ScaffoldMessenger.of(context).showSnackBar(msg);
+
+      body: Padding(
+        padding: const EdgeInsets.only(left: 10,right: 10),
+        child: ListView(
+          children: [
+            SizedBox(height: 10,),
+            SizedBox(
+              height: 50,
+              child: TextField(
+                keyboardType: TextInputType.text,
+                readOnly: false,
+                decoration: InputDecoration(hintText: "Search",hintStyle: TextStyle(color: Colors.black.withValues(alpha:  0.5)),fillColor: const Color(0xffF8F5E9),filled: true,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.search_rounded),
+                    onPressed: (){
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Available Soon")));
                     },
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 15, 10, 0),
+                ),),
+            ),
+            SizedBox(height: 15,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Categories", style: TextStyle(fontSize: 17, color: Colors.black.withValues(alpha:  0.7), fontWeight: FontWeight.w600),),
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (builder){
+                      return Categories();
+                    }));
+                  },
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text("Popular villa's", style: TextStyle(fontSize: 18, color: Colors.black87, fontWeight: FontWeight.w600),),
-                      TextButton(
-                        child: Text("See all", style: TextStyle(fontSize: 17, color: Colors.black54, fontWeight: FontWeight.w500),),
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (builder){
-                            return AllProperty();
-                          }));
-                        },
-                      )
+                      Text("See all",style: TextStyle(color: Colors.black.withValues(alpha:  0.5),fontSize: 15),),
+                      Icon(Icons.keyboard_arrow_right_rounded)
                     ],
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-                  child: Container(
-                      height: 180,
-                      child:StreamBuilder(
-                        stream: collectionReference.snapshots(),
-                        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot){
-                          if(snapshot.hasData){
-                            return ListView.builder(
-                              controller: _scrollController,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: 3,
-                              itemBuilder: (itemBuilder, index) {
-                                DocumentSnapshot data=snapshot.data!.docs[index];
-                                return Padding(
-                                  padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                                  child: Container(
-                                    height: 250,
-                                    width: MediaQuery.of(context).size.width-50,
-                                    decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(data['propertyImageUrl']), fit: BoxFit.fill),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text("Get your special", style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w500),),
-                                          Text("sale up to 50%", style: TextStyle(fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),),
-                                          Text("Buy, before it runs out", style: TextStyle(fontSize: 15, color: Colors.white70, fontWeight: FontWeight.w500),),
-                                          SizedBox(height: 25,),
-                                          Container(
-                                            height: 35,
-                                            width: 100,
-                                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
-                                            child: TextButton(
-                                                child: Text("Buy now", style: TextStyle(fontSize: 14, color: Colors.black87, fontWeight: FontWeight.w600),),
-                                                onPressed: () {
-                                                  Navigator.push(context, MaterialPageRoute(builder: (builder) {
-                                                    return ProInfo(documentId: data.id,);
-                                                  }));
-                                                }),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          } else if(snapshot.hasError){
-                            return Center(child: Text("Something went wrong"),);
-                          } else {
-                            return Center(child: CircularProgressIndicator(),);
-                          }
-                        },
-                      ),
-                ),),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 5, 15, 10),
-                  child: Container(
-                    height: 50,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
+                )
+              ],
+            ),
+            SizedBox(height: 10,),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (builder){
+                        return AllProperty(collectionName: "Apartment Flat",);
+                      }));
+                    },
+                    child: Column(
                       children: [
-                        TextButton(
-                          child: Text("All", style: TextStyle(fontSize: 16, color: Colors.grey[700], fontWeight: FontWeight.w600),),
-                          onPressed: () {},
-                        ),
-                        TextButton(
-                          child: Text("Luxury", style: TextStyle(fontSize: 16, color: Colors.grey[700], fontWeight: FontWeight.w600),),
-                          onPressed: () {
-                            final msg=SnackBar(content: Text("Feature coming soon!"),duration: Duration(seconds: 1),);
-                            ScaffoldMessenger.of(context).showSnackBar(msg);
-                          },
-                        ),
-                        TextButton(
-                          child: Text("Beachfront", style: TextStyle(fontSize: 16, color: Colors.grey[700], fontWeight: FontWeight.w600),),
-                          onPressed: () {
-                            final msg=SnackBar(content: Text("Feature coming soon!"),duration: Duration(seconds: 1),);
-                            ScaffoldMessenger.of(context).showSnackBar(msg);
-                          },
-                        ),
-                        TextButton(
-                          child: Text("Mountain", style: TextStyle(fontSize: 16, color: Colors.grey[700], fontWeight: FontWeight.w600),),
-                          onPressed: () {
-                            final msg=SnackBar(content: Text("Feature coming soon!"),duration: Duration(seconds: 1),);
-                            ScaffoldMessenger.of(context).showSnackBar(msg);
-                          },
-                        ),
-                        TextButton(
-                          child: Text("Modern", style: TextStyle(fontSize: 16, color: Colors.grey[700], fontWeight: FontWeight.w600),),
-                          onPressed: () {
-                            final msg=SnackBar(content: Text("Feature coming soon!"),duration: Duration(seconds: 1),);
-                            ScaffoldMessenger.of(context).showSnackBar(msg);
-                          },
-                        ),
-                        TextButton(
-                          child: Text("Pool", style: TextStyle(fontSize: 16, color: Colors.grey[700], fontWeight: FontWeight.w600),),
-                          onPressed: () {
-                            final msg=SnackBar(content: Text("Feature coming soon!"),duration: Duration(seconds: 1),);
-                            ScaffoldMessenger.of(context).showSnackBar(msg);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                  child: Container(
-                    height: 470,
-                    child: StreamBuilder(
-                      stream: collectionReference.snapshots(),
-                      builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-                        if(streamSnapshot.hasData){
-                          return ListView.builder(
-                            itemCount: streamSnapshot.data!.docs.length,
-                            itemBuilder: (itemBuilder, index) {
-                              DocumentSnapshot data=streamSnapshot.data!.docs[index];
-                              return Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                                child: Container(
-                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), border: Border.all(color: Colors.black87.withOpacity(0.2))),
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 150,
-                                          height: 120,
-                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),
-                                              image: DecorationImage(image: NetworkImage(data['propertyImageUrl']), fit: BoxFit.cover)),
-                                        ),
-                                        Expanded(
-                                          child: ListTile(
-                                            title: Text(data['propertyName'], style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),),
-                                            subtitle: Text("${data['propertyType']} | ${data['city']}, ${data['state']} ${data['zipCode']}", style: TextStyle(fontSize: 15, color: Colors.grey[700], fontWeight: FontWeight.w500),),
-                                            onTap: () {
-                                              Navigator.push(context, MaterialPageRoute(builder: (builder) {
-                                                return ProInfo(documentId: data.id,);
-                                              }));
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        } else if (streamSnapshot.hasError) {
-                          return Center(child: Text('Something went wrong!'),);
-                        } else {
-                          return Center(child: CircularProgressIndicator(),);
-                        }
-                      },
-                    )
-                  ),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 10, 15, 15),
-                  child: Container(
-                    padding: EdgeInsets.all(13.0),
-                    decoration: BoxDecoration(
-                      color: Colors.black87,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                            child: Text('Add your property today!', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600))),
-                        Container(
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
-                          width: 140,
-                          child: TextButton(
-                            style: TextButton.styleFrom(foregroundColor: Colors.black87, backgroundColor: Colors.white,),
-                            child: Text('Get Started', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),),
-                            onPressed: () {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (builder) {
-                                return Add();
-                              }));
-                            },
+                        Card(
+                          elevation: 3,
+                          child: Container(
+                            height: 100,width: 100,
+                            decoration: BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/Categories/Apartment  Flat.png")),borderRadius: BorderRadius.circular(5)),
                           ),
                         ),
+                        Text("Apartment / Flat",style: TextStyle(color: Colors.black.withValues(alpha:  0.8),fontWeight: FontWeight.w500),)
                       ],
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-                  child: Text('Recent Activity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),),
-                ListTile(
-                  leading: Icon(Icons.new_releases),
-                  title: Text('New Property Listed', style: TextStyle(fontWeight: FontWeight.w600),),
-                  subtitle: Text('Luxury Villa in Mumbai'),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (builder){
+                        return AllProperty(collectionName: "Villa Bungalow",);
+                      }));
+                    },
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 3,
+                          child: Container(
+                            height: 100,width: 100,
+                            decoration: BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/Categories/Villa  Bungalow.png")),borderRadius: BorderRadius.circular(5)),
+                          ),
+                        ),
+                        Text("Villa / Bungalow",style: TextStyle(color: Colors.black.withValues(alpha:  0.8),fontWeight: FontWeight.w500),)
+                      ],
+                    ),
+                  ),
                 ),
-                ListTile(
-                  leading: Icon(Icons.trending_down),
-                  title: Text('Price Drop', style: TextStyle(fontWeight: FontWeight.w600),),
-                  subtitle: Text('Modern Flat in Pune'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.check_circle),
-                  title: Text('Property Sold', style: TextStyle(fontWeight: FontWeight.w600),),
-                  subtitle: Text('Beach House in Goa'),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (builder){
+                        return AllProperty(collectionName: "Townhouse",);
+                      }));
+                    },
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 3,
+                          child: Container(
+                            height: 100,width: 100,
+                            decoration: BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/Categories/Row House  Townhouse.png")),borderRadius: BorderRadius.circular(5)),
+                          ),
+                        ),
+                        Text("Townhouse",style: TextStyle(color: Colors.black.withValues(alpha:  0.8),fontWeight: FontWeight.w500),)
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+            SizedBox(height: 15,),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (builder){
+                        return AllProperty(collectionName: "Penthouse",);
+                      }));
+                    },
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 3,
+                          child: Container(
+                            height: 100,width: 100,
+                            decoration: BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/Categories/Penthouse.png")),borderRadius: BorderRadius.circular(5)),
+                          ),
+                        ),
+                        Text("Penthouse",style: TextStyle(color: Colors.black.withValues(alpha:  0.8),fontWeight: FontWeight.w500),)
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (builder){
+                        return AllProperty(collectionName: "Studio Apartment",);
+                      }));
+                    },
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 3,
+                          child: Container(
+                            height: 100,width: 100,
+                            decoration: BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/Categories/Studio Apartment.png")),borderRadius: BorderRadius.circular(5)),
+                          ),
+                        ),
+                        Text("Studio Apartment",style: TextStyle(color: Colors.black.withValues(alpha:  0.8),fontWeight: FontWeight.w500),)
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (builder){
+                        return AllProperty(collectionName: "Duplex Triplex",);
+                      }));
+                    },
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 3,
+                          child: Container(
+                            height: 100,width: 100,
+                            decoration: BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/Categories/Duplex  Triplex.png")),borderRadius: BorderRadius.circular(5)),
+                          ),
+                        ),
+                        Text("Duplex / Triplex",style: TextStyle(color: Colors.black.withValues(alpha:  0.8),fontWeight: FontWeight.w500),)
+                      ], 
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20,),
+            StreamBuilder(
+              stream: recentVisited.doc(_auth.currentUser!.uid).collection("Recent Visit").doc("Recent Visited Product").snapshots(),
+              builder: (context, AsyncSnapshot<DocumentSnapshot> streamSnapshot){
+                if(streamSnapshot.connectionState==ConnectionState.waiting){
+                  return Center(child: CircularProgressIndicator(color: Colors.white,),);
+                } else if(streamSnapshot.hasError){
+                  return Center(child: Text("Something went wrong"));
+                } else if(!streamSnapshot.hasData || !streamSnapshot.data!.exists){
+                  return Center(child: SizedBox(),);
+                } else {
+                  Map<String, dynamic> data=streamSnapshot.data!.data() as Map<String, dynamic>;
+                  isExist=true;
+                  recentCollectionName=data['propertyType'].toString();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Recently visited", style: TextStyle(fontSize: 17, color: Colors.black.withValues(alpha:  0.7), fontWeight: FontWeight.w600),),
+                      SizedBox(height: 8,),
+                      Stack(
+                        children: [
+                          Container(
+                            height: 160,width: double.infinity,
+                            decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(data['propertyImageUrl']),fit: BoxFit.fitWidth),
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                          Container(
+                            height: 160,width: double.infinity,
+                            decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.black,Colors.transparent],begin: Alignment.centerLeft,end: Alignment.centerRight),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 20,top: 20),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(data['propertyName'],style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w600),),
+                                  SizedBox(height: 10,),
+                                  Text("${data['propertyType']}",style: TextStyle(color: Colors.white,fontSize: 15,fontWeight: FontWeight.w500),),
+                                  SizedBox(height: 2,),
+                                  Text("${data['city']}, ${data['state']} ${data['zipCode']}",style: TextStyle(color: Colors.white,fontSize: 15,fontWeight: FontWeight.w500),)
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 160,
+                            child:  GestureDetector(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (builder){
+                                  return ProInfo(collection: data['propertyType'], documentId: data['propertyId']);
+                                }));
+                              },
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
+            SizedBox(height: 15,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(isExist?"Similar properties":"New properties",
+                  style: TextStyle(fontSize: 17, color: Colors.black.withValues(alpha:  0.7), fontWeight: FontWeight.w600),),
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (builder){
+                      return AllProperty(collectionName: isExist?recentCollectionName:"Apartment");
+                    }));
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("See all",style: TextStyle(color: Colors.black.withValues(alpha:  0.5),fontSize: 15),),
+                      Icon(Icons.keyboard_arrow_right_rounded)
+                    ],
+                  ),
+                )
+              ],
+            ),
+            SizedBox(height: 10,),
+            Container(
+              height: 170,width: double.infinity,
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance.collection(isExist?recentCollectionName.toString():"Apartment").snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot){
+                  if(snapshot.connectionState==ConnectionState.waiting){
+                    return Center(child: CircularProgressIndicator(),);
+                  } else if(snapshot.hasError){
+                    return Center(child: Text("Something went wrong"),);
+                  } else if(!snapshot.hasData || snapshot.data!.docs.isEmpty){
+                    return Center(child: Text("No data yet"),);
+                  } else {
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (itemBuilder, index){
+                        DocumentSnapshot data=snapshot.data!.docs[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 10,right: 10,top: 5),
+                          child: GestureDetector(
+                            onTap: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (builder){
+                                return ProInfo(documentId: data.id, collection: data['propertyType'],);
+                              }));
+                            },
+                            child: SizedBox(
+                              height: 130,width: 130,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    height: 120,width: 120,
+                                    decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(data['propertyImageUrl']),fit: BoxFit.cover),borderRadius: BorderRadius.circular(5)),
+                                  ),
+                                  SizedBox(height: 5,),
+                                  Expanded(
+                                    child:  Text(data['propertyName'],style: const TextStyle(color: Colors.black,fontWeight: FontWeight.w600,fontSize: 14),),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
+            ),
+            SizedBox(height: 10,),
+            Container(
+              height: 5,width: MediaQuery.of(context).size.width,
+              color: Colors.grey.withValues(alpha:  0.1),
+            ),
+            SizedBox(height: 30,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Villa",style: GoogleFonts.akayaTelivigala(textStyle: TextStyle(fontSize: 25,color: Colors.black.withValues(alpha:  0.2)),),),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

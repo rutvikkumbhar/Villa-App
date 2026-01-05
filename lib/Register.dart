@@ -3,13 +3,16 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:login_form/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:login_form/Error.dart';
 import 'dart:io';
 
+import 'Login.dart';
+
 class Registration extends StatefulWidget {
+  const Registration({super.key});
+
   @override
   State<Registration> createState() => _RegistrationState();
 }
@@ -24,7 +27,7 @@ class _RegistrationState extends State<Registration> {
   bool loading=false;
   bool pass=true;
 
-  FirebaseAuth _auth=FirebaseAuth.instance;
+  final FirebaseAuth _auth=FirebaseAuth.instance;
   CollectionReference collectref=FirebaseFirestore.instance.collection('Users');
   Reference ref=FirebaseStorage.instance.ref().child('user_profile_pic');
 
@@ -34,78 +37,82 @@ class _RegistrationState extends State<Registration> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: ListView(
+        backgroundColor: Color(0xffF5EFE7),
+        body: ListView(
         children:[ Form(
           key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 40),
-              child: Text("Welcome!",style:  GoogleFonts.alexBrush(fontSize: 47),),
-            ),
-            Text("Sign up to get started.",style:  GoogleFonts.albertSans(fontSize: 14),),
-            SizedBox(height: 30,),
+            SizedBox(height: 20,),
+            Text("Welcome",style:  GoogleFonts.alexBrush(fontSize: 40),),
+            Text("Sign up to get started",style:  GoogleFonts.poppins(fontSize: 13),),
+            SizedBox(height: 20,),
             Container(
               height: 80,width: 80,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(50),
                   image: DecorationImage(image: AssetImage("assets/images/ProfilePic.jpg"),
-                      colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.3), BlendMode.darken,))),
+                      colorFilter: ColorFilter.mode(Colors.black.withValues(alpha:  0.3), BlendMode.darken,))),
               child: IconButton(
-                icon: Icon(Icons.add_a_photo_outlined,color: Colors.white,),
+                icon: Icon(Icons.add_a_photo_outlined,color: Color(0xffF5EFE7),),
                 onPressed: () async {
                   final pickedImage =await  ImagePicker().pickImage(source: ImageSource.gallery);
                   image=File(pickedImage!.path.toString());
                 }
               ),
             ),
-            SizedBox(height: 20,),
-            Container(
-              width: 300,
+            SizedBox(height: 25,),
+            Padding(
+              padding: const EdgeInsets.only(left: 30,right: 30),
               child: TextFormField(
                 keyboardType: TextInputType.name,
-                decoration: InputDecoration(labelText: "Username",
-                    labelStyle: TextStyle(fontSize: 15),
-                    prefixIcon: Icon(Icons.person_outline,size: 19,),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+                decoration: InputDecoration(labelText: "Name",prefixIcon: const Icon(Icons.person_outline_rounded,color: Color(0xff3E5879)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  floatingLabelStyle: const TextStyle(color: Colors.black),),
                     controller: nameController,
                     validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter name!';
+                      return 'Enter valid name!';
                     }
                     return null;
                     },
               ),
             ),
-            SizedBox(height: 20,),
-            Container(
-              width: 300,
+            SizedBox(height: 15,),
+            Padding(
+              padding: const EdgeInsets.only(left: 30,right: 30),
               child: TextFormField(
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: "Mobile",
-                    labelStyle: TextStyle(fontSize: 15),
-                    prefixIcon: Icon(Icons.call_outlined,size: 18,),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+                decoration: InputDecoration(labelText: "Contact",prefixIcon: const Icon(Icons.call_outlined,color: Color(0xff3E5879)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  floatingLabelStyle: const TextStyle(color: Colors.black),),
                 controller: mobileNoController,
                 validator: (value) {
                   if(value==null || value.isEmpty || value.length!=10) {
-                    return 'Please enter valid mobile no.!';
+                    return 'Enter valid no.!';
                   }
                   return null;
                 },
               ),
             ),
-            SizedBox(height: 20,),
-            Container(
-              width: 300,
+            SizedBox(height: 15,),
+            Padding(
+              padding: const EdgeInsets.only(left: 30,right: 30),
               child: TextFormField(
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(labelText: "Email",
-                    labelStyle: TextStyle(fontSize: 15),
-                    prefixIcon: Icon(Icons.email_outlined,size: 18,),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+                decoration: InputDecoration(labelText: "Email",prefixIcon: const Icon(Icons.alternate_email_rounded,color: Color(0xff3E5879)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                  floatingLabelStyle: const TextStyle(color: Colors.black),),
                 controller: emailController,
                 validator: (value) {
                   if(value==null || value.isEmpty) {
@@ -115,16 +122,17 @@ class _RegistrationState extends State<Registration> {
                 },
               ),
             ),
-            SizedBox(height: 20,),
-            Container(
-              width: 300,
+            SizedBox(height: 15,),
+            Padding(
+              padding: const EdgeInsets.only(left: 30,right: 30),
               child: TextFormField(
                 keyboardType: TextInputType.visiblePassword,
                 obscureText: pass?true:false,
                 decoration: InputDecoration(labelText: "Password", labelStyle: TextStyle(fontSize: 15),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                  prefixIcon: IconButton(
-                    icon: pass?Icon(Icons.lock_outline_rounded):Icon(Icons.lock_open_outlined),
+                    prefixIcon: const Icon(Icons.security_outlined,color: Color(0xff3E5879)),
+                  suffixIcon: IconButton(
+                    icon: pass?const FaIcon(FontAwesomeIcons.eyeSlash,size: 21,color: Color(0xff3E5879),):const FaIcon(FontAwesomeIcons.eye,size: 21,color: Color(0xffE52020),),
                     onPressed: (){
                       setState(() {
                         pass=pass?false:true;
@@ -134,50 +142,18 @@ class _RegistrationState extends State<Registration> {
                 controller: passwordController,
                 validator: (value) {
                   if(value==null || value.isEmpty) {
-                    return 'Please enter password!';
+                    return 'Enter valid password!';
                   }
                   return null;
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(25, 20, 25, 0),
-              child: Text("or"),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0,20, 0, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                      height: 32,
-                      width: 32,
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(50),border: Border.all(color:Colors.black)),
-                      child: Center(child: FaIcon(FontAwesomeIcons.facebookF,size: 16))),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                    child: Container(
-                        height: 32,
-                        width: 32,
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(50),border: Border.all(color: Colors.black),),
-                        child: Center(child: FaIcon(FontAwesomeIcons.google,size: 15,))),
-                  ),
-                  Container(
-                      height: 32,
-                      width: 32,
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(50),border: Border.all(color: Colors.black.withOpacity(0.8))),
-                      child: Center(child: FaIcon(FontAwesomeIcons.twitter,size: 15,))
-                  ),
-                ],
-              ),
-            ),
             SizedBox(height: 30,),
             Container(
-              height: 44,width: 260,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Colors.black),
-              child: ElevatedButton(
-                child: loading?CircularProgressIndicator(color: Colors.white,):Text("Sign Up",style: TextStyle(fontSize: 17),),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.black,foregroundColor: Colors.white),
+              width: 250,height: 55,
+              decoration: BoxDecoration(color: Color(0xff213555),borderRadius: BorderRadius.circular(5)),
+              child: TextButton(
+                child: loading?CircularProgressIndicator(color: Colors.white,):Text("Sign Up",style: GoogleFonts.poppins(fontWeight: FontWeight.w400,color: Colors.white,fontSize: 18)),
                 onPressed: () async {
                   setState(() {
                     loading=true;
@@ -214,16 +190,26 @@ class _RegistrationState extends State<Registration> {
                 },
               ),
             ),
-            SizedBox(height: 10,),
-            Text("Already have an account?",style: TextStyle(fontSize: 13)),
-            TextButton(
-              child: Text("Log in",style: TextStyle(fontSize: 13,color: Colors.black),),
-              onPressed: () {
-                  Navigator.pop(context, MaterialPageRoute(builder: (builder){
-                    return Login();
-                  }));
-              },
-            )
+            const SizedBox(height: 8,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Already have an account? ",style: GoogleFonts.poppins(color: const Color(0xff3E5879).withValues(alpha:  0.7),fontSize: 13,fontWeight: FontWeight.w400),),
+                GestureDetector(
+                  child: Text("Log In.",style: GoogleFonts.poppins(fontSize: 13,fontWeight: FontWeight.w400,color: Colors.blue)),
+                  onTap: (){
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 90,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Villa",style: GoogleFonts.akayaTelivigala(textStyle: TextStyle(fontSize: 23,color: Colors.black.withValues(alpha:  0.2)),),),
+              ],
+            ),
           ],
           ),
         ),

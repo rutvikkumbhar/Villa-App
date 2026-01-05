@@ -3,9 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:login_form/Home.dart';
-import 'main.dart';
+import 'Login.dart';
 
 class Flash extends StatefulWidget {
+  const Flash({super.key});
+
   @override
   State<Flash> createState() => _FlashState();
 }
@@ -15,9 +17,9 @@ class _FlashState extends State<Flash> {
   @override
   void initState() {
     super.initState();
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-    final user = _auth.currentUser;
-    Timer(Duration(seconds: 2),() {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final user = auth.currentUser;
+    Timer(const Duration(seconds: 2),() {
       if(user!=null) {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (builder){
           return Home();
@@ -33,18 +35,21 @@ class _FlashState extends State<Flash> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.7),
-      body:
-        Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.house_outlined,size: 40,color: Colors.white,),
-              SizedBox(height: 10,),
-              Text("Nestly",style: GoogleFonts.akayaTelivigala(fontSize: 30,color: Colors.white),),
-            ],
-          )
+      backgroundColor: const Color(0xffEEEEEE),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: 50,width: 50,
+              decoration: BoxDecoration(image: const DecorationImage(image: AssetImage("assets/images/app_logo.png"),fit: BoxFit.fill),
+                  borderRadius: BorderRadius.circular(50)),
+            ),
+            Text("Villa",style: GoogleFonts.akayaTelivigala(textStyle: TextStyle(fontSize: 25,color: Colors.black.withValues(alpha:  0.6)),),),
+          ],
         ),
+      ),
     );
   }
 }

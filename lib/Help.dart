@@ -3,10 +3,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:login_form/ProfileEdit.dart';
 
 class Help extends StatelessWidget {
+  const Help({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xffF5EFE7),
       appBar: AppBar(
+        backgroundColor: Color(0xffF5EFE7),
         title: Text("Help",style: GoogleFonts.arima(),),
       ),
       body: ListView(
@@ -23,7 +27,7 @@ class Help extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(15, 0,10,0),
-              child: Text(style: TextStyle(fontSize: 14),"Thank you for using our Nestly app. We're here to help you with any questions or issues you may have. Below, you'll find detailed information and guidance on how to use our app effectively."),
+              child: Text(style: TextStyle(fontSize: 14),"Thank you for using our Villa app. We're here to help you with any questions or issues you may have. Below, you'll find detailed information and guidance on how to use our app effectively."),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 30,0,10),
@@ -33,7 +37,7 @@ class Help extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(10, 2,10,10),
               child: Container(
                 height: 55,
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Colors.black.withOpacity(0.1)),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Color(0xff3E5879).withValues(alpha:  0.5)),
                 child: ListTile(
                   title: Text("Updating Your Profile",style: TextStyle(fontSize: 16),),
                   leading: Icon(Icons.stop_rounded,size: 13,),
@@ -50,7 +54,7 @@ class Help extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(10, 2,10,0),
               child: Container(
                 height: 55,
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Colors.black.withOpacity(0.1)),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Color(0xff3E5879).withValues(alpha:  0.5)),
                 child: ListTile(
                   title: Text("Change Profile Photo"),
                   leading: Icon(Icons.stop_rounded,size: 13,),
@@ -82,7 +86,7 @@ class Help extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 10),
               child: ListTile(
-                title: Text("Email: support@nestly.com",style: TextStyle(fontSize: 16),),
+                title: Text("Email: support@villa.com",style: TextStyle(fontSize: 16),),
                 leading: Icon(Icons.email_outlined,size: 16,),
               ),
             ),
@@ -106,7 +110,7 @@ class Help extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(15, 5, 0, 0),
-              child: Text("We value your feedback! Please send any suggestions or comments to feedback@nestly.com.",style: TextStyle(fontSize: 15),),
+              child: Text("We value your feedback! Please send any suggestions or comments to feedback@villa.com.",style: TextStyle(fontSize: 15),),
             ),
           ],
         ),

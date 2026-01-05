@@ -2,39 +2,58 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_form/Schedule.dart';
+import 'package:lottie/lottie.dart';
 import 'package:video_player/video_player.dart';
-
+import 'package:url_launcher/url_launcher.dart';
+import 'Error.dart';
 class ProInfo extends StatefulWidget {
 
   final String documentId;
-  ProInfo({required this.documentId});
+  final String collection;
+  const ProInfo({super.key, required this.collection,required this.documentId});
   @override
   State<ProInfo> createState() => _ProInfoState();
 }
 
 class _ProInfoState extends State<ProInfo> {
-  FirebaseAuth _auth=FirebaseAuth.instance;
-  CollectionReference collectionReference=FirebaseFirestore.instance.collection('Properties');
+  final FirebaseAuth _auth=FirebaseAuth.instance;
   VideoPlayerController? _videoController;
   Future<void>? _initializeVideoPlayerFuture;
   bool _isPlaying = false;
+  bool loading=false;
 
+  @override
   void dispose() {
     _videoController?.dispose();
     super.dispose();
   }
+  Future<void> openMap(String locationUrl) async {
+    final Uri uri = Uri.parse(locationUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch $locationUrl';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
    return Scaffold(
      appBar: AppBar(
-       title: Text("Property information",style: TextStyle(fontSize: 21,color: Colors.black,fontWeight: FontWeight.w400),),
+       backgroundColor: Color(0xffF5EFE7),
+       title: Text("Property information"),
      ),
-     backgroundColor: Colors.white,
+     backgroundColor: Color(0xffF5EFE7),
      body: Padding(
-       padding: const EdgeInsets.all(15),
+       padding: const EdgeInsets.only(left: 10,right: 10),
        child: StreamBuilder(
-         stream: collectionReference.doc(widget.documentId).snapshots(),
+         stream: FirebaseFirestore.instance.collection(widget.collection).doc(widget.documentId).snapshots(),
          builder: (context,AsyncSnapshot<DocumentSnapshot> snapshot){
-           if(snapshot.hasData) {
+           if(snapshot.connectionState==ConnectionState.waiting){
+             return Center(child: CircularProgressIndicator(color: Color(0xff213555),),);
+           } else if(snapshot.hasError) {
+             return Center(child: Text("Something went wrong!"),);
+           } else {
              Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
              if (_videoController == null && data['propertyVideoUrl'] != null) {
                _videoController = VideoPlayerController.networkUrl(Uri.parse(data['propertyVideoUrl']));
@@ -42,7 +61,6 @@ class _ProInfoState extends State<ProInfo> {
                  setState(() {});
                });
              }
-
              return ListView(
                children: [
                  Padding(
@@ -58,48 +76,48 @@ class _ProInfoState extends State<ProInfo> {
                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),
                                image: DecorationImage(image: NetworkImage(data['propertyImageUrl']),fit: BoxFit.cover)),
                          ),
-                     SizedBox(width: 10,),
-                     Container(
-                       height: 200,
-                       width: 350,
-                       decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                       child: _videoController != null ? FutureBuilder(
-                         future: _initializeVideoPlayerFuture,
-                         builder: (context, snapshot) {
-                           if (snapshot.connectionState == ConnectionState.done) {
-                             return GestureDetector(
-                               onTap: () {
-                                 setState(() {
-                                   if (_videoController!.value.isPlaying) {
-                                     _videoController!.pause();
-                                     _isPlaying = false;
-                                   } else {
-                                     _videoController!.play();
-                                     _isPlaying = true;
-                                   }
-                                 });
-                               },
-                               child: Stack(
-                                 children:[ AspectRatio(
-                                   aspectRatio: _videoController!.value.aspectRatio,
-                                   child: VideoPlayer(_videoController!),
-                                 ),
-                                   Center(
-                                     child: Icon(
-                                       _isPlaying ? Icons.pause : Icons.play_arrow,
-                                       color: Colors.white,
-                                       size: 40,
+                         SizedBox(width: 10,),
+                         Container(
+                             height: 200,
+                             width: 350,
+                             decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                             child: _videoController != null ? FutureBuilder(
+                               future: _initializeVideoPlayerFuture,
+                               builder: (context, snapshot) {
+                                 if (snapshot.connectionState == ConnectionState.done) {
+                                   return GestureDetector(
+                                     onTap: () {
+                                       setState(() {
+                                         if (_videoController!.value.isPlaying) {
+                                           _videoController!.pause();
+                                           _isPlaying = false;
+                                         } else {
+                                           _videoController!.play();
+                                           _isPlaying = true;
+                                         }
+                                       });
+                                     },
+                                     child: Stack(
+                                         children:[ AspectRatio(
+                                           aspectRatio: _videoController!.value.aspectRatio,
+                                           child: VideoPlayer(_videoController!),
+                                         ),
+                                           Center(
+                                             child: Icon(
+                                               _isPlaying ? Icons.pause : Icons.play_arrow,
+                                               color: Colors.white,
+                                               size: 40,
+                                             ),
+                                           ),
+                                         ]
                                      ),
-                                   ),
-                               ]
-                               ),
-                             );
-                           } else {
-                             return Center(child: CircularProgressIndicator());
-                           }
-                         },
-                       )
-                           : Center(child: Text("No Video Available"))),
+                                   );
+                                 } else {
+                                   return Center(child: CircularProgressIndicator());
+                                 }
+                               },
+                             )
+                                 : Center(child: Text("No Video Available"))),
                        ],
                      ),
                    ),
@@ -122,7 +140,7 @@ class _ProInfoState extends State<ProInfo> {
                  ),
                  Container(
                    height: 1,
-                   color: Colors.black.withOpacity(0.1),
+                   color: Colors.black.withValues(alpha:  0.1),
                  ),
                  Padding(
                    padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
@@ -131,27 +149,37 @@ class _ProInfoState extends State<ProInfo> {
                      children: [
                        Container(
                          height: 50,
-                         // width: 160,
-                         decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Colors.black),
+                         decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Color(0xff213555)),
                          child: TextButton(
-                           child: Text("Schedule",style: TextStyle(color: Colors.white,fontSize: 17,fontWeight: FontWeight.w600)),
+                           child: const Text("Schedule",style: TextStyle(color: Colors.white,fontSize: 17,fontWeight: FontWeight.w600)),
                            onPressed: (){
                              Navigator.push(context, MaterialPageRoute(builder: (builder){
-                               return Schedule(documentId: snapshot.data!.id,);
+                               return Schedule(collection: widget.collection,documentId: snapshot.data!.id,);
                              }));
                            },
                          ),
                        ),
                        Container(
                          height: 50,
-                         decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Colors.white,border: Border.all(color: Colors.black87.withOpacity(0.9))),
+                         decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Colors.white,border: Border.all(color: Colors.black87.withValues(alpha:  0.9))),
                          child: TextButton(
-                           child: Text("Add to Favourites",style: TextStyle(color: Colors.black87,fontSize: 17,fontWeight: FontWeight.w600)),
-                           onPressed: (){
-                             CollectionReference ref=FirebaseFirestore.instance.collection('FAV_${_auth.currentUser!.uid}');
-                             ref.doc(widget.documentId).set(data);
-                             final msg=SnackBar(content: Text("Added to favourites"));
-                             ScaffoldMessenger.of(context).showSnackBar(msg);
+                           child: loading?CircularProgressIndicator(color: Color(0xff213555),) :Text("Favourites",style: TextStyle(color: Colors.black87,fontSize: 17,fontWeight: FontWeight.w600)),
+                           onPressed: ()async{
+                             setState(() {
+                               loading=true;
+                             });
+                             CollectionReference ref=FirebaseFirestore.instance.collection('Users').doc(_auth.currentUser!.uid).collection('Favourites');
+                             await ref.doc(snapshot.data!.id).set(data).then((onValue){
+                               setState(() {
+                                 loading=false;
+                               });
+                               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Added to favourites")));
+                             }).onError((error,stackTrace){
+                               setState(() {
+                                 loading=false;
+                               });
+                               Error().toastMessage(error.toString());
+                             });
                            },
                          ),
                        ),
@@ -160,15 +188,35 @@ class _ProInfoState extends State<ProInfo> {
                  ),
                  Container(
                    height: 1,
-                   color: Colors.black.withOpacity(0.1),
+                   color: Colors.black.withValues(alpha:  0.1),
                  ),
-                 Padding(
-                   padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                   child: Text("Address",style: TextStyle(fontSize: 20,color: Colors.black87,fontWeight: FontWeight.w500)),
-                 ),
-                 Padding(
-                   padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
-                   child: Text("${data['address']}",style: TextStyle(fontSize: 15,color: Colors.black54,fontWeight: FontWeight.w500)),
+                 Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                   crossAxisAlignment: CrossAxisAlignment.center,
+                   children: [
+                     Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       mainAxisAlignment: MainAxisAlignment.start,
+                       children: [
+                         Padding(
+                           padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                           child: Text("Address",style: TextStyle(fontSize: 20,color: Colors.black87,fontWeight: FontWeight.w500)),
+                         ),
+                         Padding(
+                           padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+                           child: Text("${data['address']}",style: TextStyle(fontSize: 15,color: Colors.black54,fontWeight: FontWeight.w500)),
+                         ),
+                       ],
+                     ),
+                     GestureDetector(
+                       onTap: (){
+                         openMap(data['locLink']);
+                       },
+                       child: Container(
+                         height: 50,width: 50,
+                         child: Lottie.asset("assets/Animations/Location Pin.json"),)
+                     )
+                   ],
                  ),
                  Padding(
                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -177,11 +225,12 @@ class _ProInfoState extends State<ProInfo> {
                  SizedBox(height: 15,),
                  Container(
                    height: 370,
-                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Colors.blueAccent.withOpacity(0.1),
-                       border: Border.all(color: Colors.black54.withOpacity(0.1))),
+                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Colors.blueAccent.withValues(alpha:  0.1),
+                       border: Border.all(color: Colors.black54.withValues(alpha:  0.1))),
                    child: Column(
                      children: [
-                       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
+                       Row(
+                         mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
                          Expanded(
                            child: ListTile(
                              leading: Icon(Icons.newspaper_outlined,),
@@ -266,16 +315,20 @@ class _ProInfoState extends State<ProInfo> {
                  ),
                  Padding(
                    padding: const EdgeInsets.fromLTRB(0, 25, 0, 0),
-                   child: Text("Description",style: TextStyle(fontSize: 20,color: Colors.black87,fontWeight: FontWeight.w500)),
+                   child: Text("Description",
+                       style: TextStyle(fontSize: 20,color: Colors.black87,fontWeight: FontWeight.w500)),
                  ),
-                 Text("${data['description']}",style: TextStyle(fontSize: 15,color: Colors.black54,fontWeight: FontWeight.w500)),
+                 Text("${data['description']}",
+                     style: TextStyle(fontSize: 15,color: Colors.black54,fontWeight: FontWeight.w500)),
                  Padding(
                    padding: const EdgeInsets.fromLTRB(0, 25, 0, 0),
-                   child: Text("Contact information",style: TextStyle(fontSize: 20,color: Colors.black87,fontWeight: FontWeight.w500)),
+                   child: Text("Contact information",
+                       style: TextStyle(fontSize: 20,color: Colors.black87,fontWeight: FontWeight.w500)),
                  ),
                  SizedBox(height: 10,),
                  Container(
-                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),border: Border.all(color: Colors.black54.withOpacity(0.1))),
+                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),
+                       border: Border.all(color: Colors.black54.withValues(alpha:  0.1))),
                    child: Column(
                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                      crossAxisAlignment: CrossAxisAlignment.center,
@@ -292,21 +345,11 @@ class _ProInfoState extends State<ProInfo> {
                          subtitle: Text("${data['sellerEmail']}"),
                          trailing: Icon(Icons.verified_outlined,color: Colors.greenAccent,),
                        ),
-                       ListTile(
-                         leading: Icon(Icons.call_outlined),
-                         title: Text("Contact",style: TextStyle(fontWeight: FontWeight.w500),),
-                         subtitle: Text("+91 ${data['sellerContact']}"),
-                         trailing: Icon(Icons.verified_outlined,color: Colors.greenAccent,),
-                       ),
                      ],
                    ),
                  )
                ],
              );
-           } else if(snapshot.hasError){
-             return Center(child: Text("Something went wrong"),);
-           } else {
-             return Center(child: CircularProgressIndicator(),);
            }
          },
        )

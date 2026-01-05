@@ -1,19 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:login_form/Home.dart';
-import 'package:login_form/ProInfo.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'Error.dart';
 
 class Schedule extends StatefulWidget {
   @override
   State<Schedule> createState() => _ScheduleState();
   final String documentId;
-  Schedule({required this.documentId});
+  final String collection;
+  const Schedule({super.key, required this.collection,required this.documentId});
 }
 
 class _ScheduleState extends State<Schedule> {
-
-  CollectionReference ref=FirebaseFirestore.instance.collection('Properties');
+  
+  CollectionReference collectionReference=FirebaseFirestore.instance.collection("SCHEDULES");
+  final FirebaseAuth _auth=FirebaseAuth.instance;
+  
   User? user=FirebaseAuth.instance.currentUser;
   bool loading=false;
   DateTime? pickedDate;
@@ -25,28 +28,34 @@ class _ScheduleState extends State<Schedule> {
   final addressController=TextEditingController();
   final dateController=TextEditingController();
   final timeController=TextEditingController();
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xffF5EFE7),
       appBar: AppBar(
+        backgroundColor: Color(0xffF5EFE7),
         title: Text("Schedule meeting",style: TextStyle(fontSize: 21),),
       ),
-      body: Padding(padding: EdgeInsets.all(20),
+      body: Padding(
+        padding: EdgeInsets.only(left:10,right: 10),
       child: Form(
         key: _formKey,
         child: ListView(
           children: [
             StreamBuilder(
-              stream: ref.doc(widget.documentId).snapshots(),
+              stream: FirebaseFirestore.instance.collection(widget.collection).doc(widget.documentId).snapshots(),
               builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot){
                 if(snapshot.hasData){
                   Map<String, dynamic> data=snapshot.data!.data() as Map<String, dynamic>;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start ,
                     children: [
-                      Text("Property",style: TextStyle(fontSize: 17),),
+                      Text("Property",
+                        style: TextStyle(fontSize: 17, color: Colors.black.withValues(alpha:  0.7), fontWeight: FontWeight.w600),),
                       SizedBox(height: 10,),
                       Container(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),border: Border.all(color: Colors.black87.withOpacity(0.2))),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),border: Border.all(color: Colors.black87.withValues(alpha:  0.2))),
                         child: Padding(
                           padding: const EdgeInsets.all(10),
                           child: Row(
@@ -72,10 +81,11 @@ class _ScheduleState extends State<Schedule> {
                         ),
                       ),
                       SizedBox(height: 25,),
-                      Text("Buyer info",style: TextStyle(fontSize: 17),),
+                      Text("Buyer info",
+                        style: TextStyle(fontSize: 17, color: Colors.black.withValues(alpha:  0.7), fontWeight: FontWeight.w600),),
                       SizedBox(height: 10,),
                       Container(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),border: Border.all(color: Colors.black87.withOpacity(0.1))),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),border: Border.all(color: Colors.black87.withValues(alpha:  0.1))),
                         child: Padding(
                           padding: const EdgeInsets.all(20),
                           child: Column(
@@ -83,7 +93,11 @@ class _ScheduleState extends State<Schedule> {
                               TextFormField(
                                 keyboardType: TextInputType.name,
                                 decoration: InputDecoration(labelText: "Full name",
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),),
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  floatingLabelStyle: const TextStyle(color: Colors.black),),
                                 controller: buyerNameController,
                                 validator: (value){
                                   if(value==null || value.isEmpty){
@@ -96,8 +110,12 @@ class _ScheduleState extends State<Schedule> {
                               SizedBox(height: 20,),
                               TextFormField(
                                 keyboardType: TextInputType.emailAddress,
-                                decoration: InputDecoration(labelText: "Email address",
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+                                decoration: InputDecoration(labelText: "Email",
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  floatingLabelStyle: const TextStyle(color: Colors.black),),
                                 controller: buyerEmailController,
                                 validator: (value){
                                   if(value==null || value.isEmpty){
@@ -110,8 +128,12 @@ class _ScheduleState extends State<Schedule> {
                               SizedBox(height: 20,),
                               TextFormField(
                                 keyboardType: TextInputType.number,
-                                decoration: InputDecoration(labelText: "Contact number",
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+                                decoration: InputDecoration(labelText: "Contact",
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  floatingLabelStyle: const TextStyle(color: Colors.black),),
                                 controller: buyerNumberController,
                                 validator: (value){
                                   if(value==null || value.isEmpty || value.length!=10){
@@ -126,21 +148,26 @@ class _ScheduleState extends State<Schedule> {
                         ),
                       ),
                       SizedBox(height: 25,),
-                      Text("Schedule info",style: TextStyle(fontSize: 17),),
+                      Text("Schedule info",
+                        style: TextStyle(fontSize: 17, color: Colors.black.withValues(alpha:  0.7), fontWeight: FontWeight.w600),),
                       SizedBox(height: 10,),
                       Container(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),border: Border.all(color: Colors.black87.withOpacity(0.1))),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),border: Border.all(color: Colors.black87.withValues(alpha:  0.1))),
                         child: Padding(
                           padding: const EdgeInsets.all(20),
                           child: Column(
                             children: [
                               TextFormField(
                                 decoration: InputDecoration(suffixIcon: Icon(Icons.date_range_outlined),labelText: "Date",
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  floatingLabelStyle: const TextStyle(color: Colors.black),),
                                 readOnly: true,
                                 controller: dateController,
                                 validator: (value){
-                                  if(value!.isEmpty || value==null){
+                                  if(value!.isEmpty){
                                     return 'Date is required';
                                   }
                                   return null;
@@ -148,8 +175,8 @@ class _ScheduleState extends State<Schedule> {
                                 onTap: () async {
                                   pickedDate=await  showDatePicker(
                                     context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2000),
+                                    initialDate: DateTime.now().add(const Duration(days: 1)),
+                                    firstDate: DateTime.now().add(const Duration(days: 1)),
                                     lastDate: DateTime(2100),
                                   );
                                   if(pickedDate!=null){
@@ -161,12 +188,16 @@ class _ScheduleState extends State<Schedule> {
                               ),
                               SizedBox(height: 20,),
                               TextFormField(
-                                decoration: InputDecoration(labelText: "Time",suffixIcon: Icon(Icons.watch_later_outlined),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+                                decoration: InputDecoration(suffixIcon: Icon(Icons.watch_later_outlined), labelText: "Time",
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  floatingLabelStyle: const TextStyle(color: Colors.black),),
                                 readOnly: true,
                                 controller: timeController,
                                 validator: (value){
-                                  if(value!.isEmpty || value==null) {
+                                  if(value!.isEmpty) {
                                     return 'Time is required!';
                                   }
                                   return null;
@@ -178,7 +209,7 @@ class _ScheduleState extends State<Schedule> {
                                   );
                                   if(pickedTime!=null) {
                                     setState(() {
-                                      timeController.text=pickedTime!.hour.toString()+":"+pickedTime!.minute.toString()+" "+pickedTime!.period.name.toUpperCase();
+                                      timeController.text="${pickedTime!.hour}:${pickedTime!.minute} ${pickedTime!.period.name.toUpperCase()}";
                                     });
                                   }
                                 },
@@ -186,11 +217,15 @@ class _ScheduleState extends State<Schedule> {
                               SizedBox(height: 20,),
                               TextFormField(
                                 keyboardType: TextInputType.text,
-                                decoration: InputDecoration(labelText: "Address",suffixIcon: Icon(Icons.location_on_outlined),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(5))),
+                                decoration: InputDecoration(suffixIcon: Icon(Icons.location_on_outlined), labelText: "Address",
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: const BorderSide(color: Color(0xff393E46))),
+                                  floatingLabelStyle: const TextStyle(color: Colors.black),),
                                 controller: addressController,
                                 validator: (value){
-                                  if(value!.isEmpty || value==null){
+                                  if(value!.isEmpty){
                                     return 'Address is required';
                                   }
                                   return null;
@@ -205,65 +240,65 @@ class _ScheduleState extends State<Schedule> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Container(
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Colors.black87),
-                            child: TextButton(
-                              child: loading? CircularProgressIndicator(color: Colors.white,):Text("Confirm meeting",style: TextStyle(color: Colors.white,fontSize: 17,fontWeight: FontWeight.w600)),
-                              onPressed: () async {
-                                if(_formKey.currentState!.validate()){
+                            height: 50,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),color: Color(0xff213555)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 15,right: 15),
+                              child: TextButton(
+                                child: loading? CircularProgressIndicator(color: Colors.white,):Text("Confirm",style: TextStyle(color: Colors.white,fontSize: 17,fontWeight: FontWeight.w600)),
+                                onPressed: () async {
                                   setState(() {
                                     loading=true;
                                   });
-                                  CollectionReference collref=FirebaseFirestore.instance.collection("SCH_${user!.uid}");
-                                  await collref.doc().set({
-                                    'scheduleType':"Seller details",
-                                    'buyerName':buyerNameController.text.toString(),
-                                    'buyerEmail':buyerEmailController.text.toString(),
-                                    'buyerNumber':buyerNumberController.text.toString(),
-                                    'propertyId':widget.documentId,
-                                    'sellerName':data['sellerName'],
-                                    'sellerEmail':data['sellerEmail'],
-                                    'sellerContact':data['sellerContact'],
-                                    'sellerId':data['sellerId'],
-                                    'scheduleDate':dateController.text.toString(),
-                                    'scheduleTime':timeController.text.toString(),
-                                    'address':addressController.text.toString(),
-                                    'propertyName':data['propertyName'],
-                                  });
-                                  CollectionReference seller=FirebaseFirestore.instance.collection("SCH_${data['sellerId']}");
-                                  await seller.doc().set({
-                                    'scheduleType':"Buyer details",
-                                    'buyerName':data['sellerName'],
-                                    'buyerEmail':data['sellerEmail'],
-                                    'buyerNumber':data['sellerContact'],
-                                    'propertyId':widget.documentId,
-                                    'sellerName':buyerNameController.text.toString(),
-                                    'sellerEmail':buyerEmailController.text.toString(),
-                                    'sellerContact':buyerNumberController.text.toString(),
-                                    'sellerId':user!.uid.toString(),
-                                    'scheduleDate':dateController.text.toString(),
-                                    'scheduleTime':timeController.text.toString(),
-                                    'address':addressController.text.toString(),
-                                    'propertyName':data['propertyName'],
-                                  });
-
-                                  final msg=SnackBar(content: Text("Meeting scheduled successfully"));
-                                  ScaffoldMessenger.of(context).showSnackBar(msg);
-                                  Navigator.of(context).pushAndRemoveUntil( MaterialPageRoute(builder: (context) => Home()),
-                                        (Route<dynamic> route) => false,);
-                                }
-                              },
+                                  if(_formKey.currentState!.validate()){
+                                    setState(() {
+                                      loading=true;
+                                    });
+                                    final String unique=DateTime.now().millisecondsSinceEpoch.toString();
+                                    collectionReference.doc(unique).set({
+                                      'buyerName':buyerNameController.text.toString(),
+                                      'buyerEmail':buyerEmailController.text.toString(),
+                                      'buyerNumber':buyerNumberController.text.toString(),
+                                      'buyerId':_auth.currentUser!.uid.toString(),
+                                      'sellerName':data['sellerName'],
+                                      'sellerEmail':data['sellerEmail'],
+                                      'sellerContact':data['sellerContact'],
+                                      'sellerId':data['sellerId'],
+                                      "createdAt": unique,
+                                      'status':"PENDING",
+                                      'propertyId':widget.documentId,
+                                      'propertyType':widget.collection,
+                                      'propertyName':data['propertyName'],
+                                      'propertyImageUrl':data['propertyImageUrl'],
+                                      'scheduleDate':dateController.text.toString(),
+                                      'scheduleTime':timeController.text.toString(),
+                                      'address':addressController.text.toString(),
+                                    }).then((onValue){
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Meeting request sent!")));
+                                      Navigator.pop(context);
+                                    }).onError((error,stackTrace){
+                                      Error().toastMessage(error.toString());
+                                    });
+                                  }else {
+                                    setState(() {
+                                      loading=false;
+                                    });
+                                  }
+                                },
+                              ),
                             ),
                           ),
                           Container(
-                            height:45,
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),border: Border.all(color: Colors.black87.withOpacity(0.9))),
-                            child: TextButton(
-                              child: Text("Cancel",style: TextStyle(color: Colors.black87,fontSize: 17,fontWeight: FontWeight.w600)),
-                              onPressed: (){
-                                Navigator.pop(context, MaterialPageRoute(builder: (builder){
-                                  return ProInfo(documentId: widget.documentId,);
-                                }));
-                              },
+                            height:50,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),border: Border.all(color: Colors.black87.withValues(alpha:  0.9))),
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 15,right: 15),
+                              child: TextButton(
+                                child: Text("Cancel",style: TextStyle(color: Colors.black87,fontSize: 17,fontWeight: FontWeight.w600)),
+                                onPressed: (){
+                                 Navigator.pop(context);
+                                },
+                              ),
                             ),
                           ),
                         ],
@@ -276,7 +311,14 @@ class _ScheduleState extends State<Schedule> {
                   return Center(child: CircularProgressIndicator(),);
                 }
               },
-            )
+            ),
+            SizedBox(height: 35,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Villa",style: GoogleFonts.akayaTelivigala(textStyle: TextStyle(fontSize: 25,color: Colors.black.withValues(alpha:  0.2)),),),
+              ],
+            ),
           ],
         ),
       ),),
