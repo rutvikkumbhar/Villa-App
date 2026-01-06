@@ -52,7 +52,7 @@ class _Meetings_2State extends State<Meetings_2> {
                 itemBuilder: (itemBuilder, index){
                   DocumentSnapshot data=snapshot.data!.docs[index];
                   return Container(
-                    height: 240,width: double.infinity,
+                    width: double.infinity,
                     decoration: BoxDecoration(color: Color(0xffD8C4B6).withValues(alpha:  0.4),borderRadius: BorderRadius.circular(15)),
                     child: Padding(
                       padding: const EdgeInsets.all(12),
@@ -68,25 +68,28 @@ class _Meetings_2State extends State<Meetings_2> {
                                 height: 100,width: 130,
                                 decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(data['propertyImageUrl']),fit: BoxFit.cover),borderRadius: BorderRadius.circular(5)),
                               ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(data['propertyName'],
-                                    style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: Colors.black.withValues(alpha:  0.9)),),
-                                  SizedBox(height: 3,),
-                                  Text(data['propertyType'],
-                                    style: TextStyle(fontSize: 17,fontWeight: FontWeight.w500,color: Colors.black.withValues(alpha:  0.7)),),
-                                  SizedBox(height: 3,),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.calendar_month_rounded,size: 18,color: Color(0xff213555),),
-                                      SizedBox(width: 5,),
-                                      Text("${data['scheduleDate']} | ${data['scheduleTime']}",
-                                        style:TextStyle(fontSize: 17,color: Colors.black,fontWeight: FontWeight.w400),)
-                                    ],
-                                  )
-                                ],
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(data['propertyName'],
+                                      style: TextStyle(fontSize: 17,fontWeight: FontWeight.w500,color: Colors.black.withValues(alpha:  0.9)),),
+                                    SizedBox(height: 3,),
+                                    Text(data['propertyType'],
+                                      style: TextStyle(fontSize: 17,fontWeight: FontWeight.w500,color: Colors.black.withValues(alpha:  0.7)),),
+                                    SizedBox(height: 3,),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Icon(Icons.calendar_month_rounded,size: 18,color: Color(0xff213555),),
+                                        SizedBox(width: 5,),
+                                        Text("${data['scheduleDate']} | ${data['scheduleTime']}",
+                                          style:TextStyle(fontSize: 17,color: Colors.black,fontWeight: FontWeight.w400),)
+                                      ],
+                                    )
+                                  ],
+                                ),
                               )
                             ],
                           ),

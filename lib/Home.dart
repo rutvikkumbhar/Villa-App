@@ -493,7 +493,7 @@ class _HomeState extends State<Home> {
                 GestureDetector(
                   onTap: (){
                     Navigator.push(context, MaterialPageRoute(builder: (builder){
-                      return AllProperty(collectionName: isExist?recentCollectionName:"Apartment");
+                      return AllProperty(collectionName: isExist?recentCollectionName:"Apartment Flat");
                     }));
                   },
                   child: Row(
@@ -508,10 +508,10 @@ class _HomeState extends State<Home> {
               ],
             ),
             SizedBox(height: 10,),
-            Container(
+            SizedBox(
               height: 170,width: double.infinity,
               child: StreamBuilder(
-                stream: FirebaseFirestore.instance.collection(isExist?recentCollectionName.toString():"Apartment").snapshots(),
+                stream: FirebaseFirestore.instance.collection(isExist?recentCollectionName.toString():"Apartment Flat").snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot){
                   if(snapshot.connectionState==ConnectionState.waiting){
                     return Center(child: CircularProgressIndicator(),);
